@@ -23,13 +23,15 @@ const verifyCache = (req, res, next) => {
             return res.status(200).json({
                 exchange_rate: rate,
                 currency_code: to_currency_code,
-                amount: (amount * rate).toFixed(2),
+                amount: amount * rate,
             })
         }
 
         return next()
     } catch (err) {
-        throw new Error(err)
+        res.status(400).json({
+            message: 'Something happened'
+        })
     }
 }
 
@@ -39,11 +41,6 @@ app.get('/api/quote', verifyCache, async (req, res) => {
         amount, 
         to_currency_code 
     } = req.query
-    if(!from_currency_code && !amount && !to_currency_code) {
-        return res.status(400).json({
-            message: 'Wrong values'
-        })
-    }
     const key = from_currency_code.concat('-', to_currency_code)
 
     try {
@@ -51,16 +48,18 @@ app.get('/api/quote', verifyCache, async (req, res) => {
             await axios.get(apiUrl + from_currency_code)
             .then( result => result.data )
 
-        const exchange_rate = data[`${to_currency_code}`].toFixed(2)
+        const exchange_rate = data[to_currency_code].toFixed(2)
         cache.set(key, exchange_rate)
 
         return res.status(200).json({
             exchange_rate: exchange_rate,
             currency_code: to_currency_code,
-            amount: (amount * exchange_rate).toFixed(2),
+            amount: amount * exchange_rate,
         })
     } catch (err) {
-        return response.status(400).send(err)
+        res.status(400).json({
+            message: 'Something happened'
+        })
     }
 })
 
