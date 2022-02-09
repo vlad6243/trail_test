@@ -23,7 +23,7 @@ const verifyCache = (req, res, next) => {
             return res.status(200).json({
                 exchange_rate: rate,
                 currency_code: to_currency_code,
-                amount: amount * rate,
+                amount: (amount * rate).toFixed(2),
             })
         }
 
@@ -54,7 +54,7 @@ app.get('/api/quote', verifyCache, async (req, res) => {
         return res.status(200).json({
             exchange_rate: exchange_rate,
             currency_code: to_currency_code,
-            amount: amount * exchange_rate,
+            amount: (amount * exchange_rate).toFixed(2),
         })
     } catch (err) {
         res.status(400).json({
